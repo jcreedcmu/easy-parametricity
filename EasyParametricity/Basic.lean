@@ -1,5 +1,6 @@
 import Mathlib.CategoryTheory.Functor.Category
 import Mathlib.CategoryTheory.Category.Cat.Limit
+import Mathlib.CategoryTheory.Limits.HasLimits
 import Mathlib.Logic.Function.Defs
 import Mathlib.Tactic.Find
 
@@ -81,18 +82,18 @@ def DiagramShape (E : Type u) : Type u := Option E
 -- These are the morphisms of our diagram category. It has E objects
 -- "upstairs", and one object "downstairs", and for every upstairs object,
 -- a unique morphism down to the downstairs object.
-inductive DiagramHom {E : Type u} : (src tgt : DiagramShape E) → Type u where
-  | dhid : (c : DiagramShape E) → DiagramHom c c
-  | dhdown : (e : E) → DiagramHom (some e) none
+inductive dhmap {E : Type u} : (src tgt : DiagramShape E) → Type u where
+  | dhid : (c : DiagramShape E) → dhmap c c
+  | dhdown : (e : E) → dhmap (some e) none
 
-open DiagramHom
+open dhmap
 
-def dhcomp {E : Type u} {X Y Z : DiagramShape E} : DiagramHom X Y → DiagramHom Y Z → DiagramHom X Z 
+def dhcomp {E : Type u} {X Y Z : DiagramShape E} : dhmap X Y → dhmap Y Z → dhmap X Z 
 | (dhid c) , f => f
 | (dhdown e) , (dhid none) => dhdown e
 
 instance (E : Type u) : SmallCategory (DiagramShape E) where
-  Hom := DiagramHom 
+  Hom := dhmap 
   id := dhid 
   comp := dhcomp
   -- These should be easy to prove, but aren't particularly
@@ -104,8 +105,15 @@ instance (E : Type u) : SmallCategory (DiagramShape E) where
 -- in terms of the factorization (g, h)
 def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  let ⟨ X, g, h, factorizes ⟩ := φ 
- let L : C := sorry
- let p : L ⟶ B := sorry
+
+ -- The actual diagram we want to take the limit of
+ let F : (DiagramShape E) ⥤ C := sorry
+
+ let limcone : Limits.LimitCone F := Classical.choice (Limits.HasLimit.exists_limit)
+ let cone := limcone.cone
+
+ let L : C := limcone.cone.pt
+ let p : L ⟶ B := sorry 
  let d : X ⟶ L := sorry
  {
   X := L,
@@ -131,6 +139,7 @@ def Unull (R : Type u) : Prop := Function.Bijective (λ (r : R) (_ : Type u) => 
 structure isConst {A B : Type u} (h : A → B) where
   uval : B
   path : (a : A) → h a = uval
+
 
 /-
 Lemma 2:
