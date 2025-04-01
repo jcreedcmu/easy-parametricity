@@ -1,4 +1,5 @@
 # Easy Parametricity
+![lean ci](https://github.com/github/docs/actions/workflows/lean_action_ci.yml/badge.svg)
 
 This is my attempt to formalize Jem Lord's proof of a very interesting
 parametricity result, alluded to in [this talk
