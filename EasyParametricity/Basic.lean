@@ -17,7 +17,7 @@ open CategoryTheory
 
 universe v u
 
-#check Limits.HasLimits
+
 variable {C : Type u} [Category C] [Limits.HasLimits.{u} C] {A B : C} (f : A ⟶ B)
 
 structure Factor where
@@ -26,7 +26,6 @@ structure Factor where
  h : X ⟶ B
  factorizes : g ≫ h = f
 
-#check Factor
 
 /-
 Lemma 1: For any factorization (g : A → X, h : X → B) = f, there exists a function
@@ -75,8 +74,17 @@ In fact this is the diagonal cone, so d = id, and
   M(1) = (id ∘ g, h)
 as required.
 -/
-def Mfunc : (φ : Factor f) → Type → Factor f 
-| ⟨ X, g, h, factorizes ⟩ => sorry
+def Mfunc (φ : Factor f) (E : Type) : Factor f :=
+ let ⟨ X, g, h, factorizes ⟩ := φ 
+ let L : C := sorry
+ let p : L ⟶ B := sorry
+ let d : X ⟶ L := sorry
+ {
+  X := L,
+  g := g ≫ d,
+  h := p ,
+  factorizes := sorry
+ }
 
 def idFac : Factor f :=
   let X : C := B
@@ -116,3 +124,4 @@ def mainLemma (R : Type u) (un : Unull R) (fc : Factor f → R) : isConst fc  :=
  sorry
 
 
+ 
