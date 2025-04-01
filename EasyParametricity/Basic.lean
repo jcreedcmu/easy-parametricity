@@ -74,6 +74,36 @@ In fact this is the diagonal cone, so d = id, and
   M(1) = (id ∘ g, h)
 as required.
 -/
+
+-- Given an E, gives the category that is to be the shape of the limit diagram
+def DiagramShape (E : Type u) : Type u := Option E
+
+-- These are the morphisms of our diagram category. It has E objects
+-- "upstairs", and one object "downstairs", and for every upstairs object,
+-- a unique morphism down to the downstairs object.
+inductive DiagramHom {E : Type u} : (src tgt : DiagramShape E) → Type u where
+  | dhid : (c : DiagramShape E) → DiagramHom c c
+  | dhdown : (e : E) → DiagramHom (some e) none
+
+instance (E : Type u) : Quiver (DiagramShape E) where
+   Hom := DiagramHom 
+
+open DiagramHom
+
+def dhcomp {E : Type u} {X Y Z : DiagramShape E} : (X ⟶ Y) → (Y ⟶ Z) → (X ⟶ Z) 
+| (dhid c) , f => f
+| (dhdown e) , (dhid none) => dhdown e
+
+instance (E : Type u) : CategoryStruct (DiagramShape E) where
+   id := dhid 
+   comp := dhcomp
+
+instance (E : Type u) : SmallCategory (DiagramShape E) where
+  comp_id := sorry
+  assoc := sorry
+
+-- Definition of the function M : E → fact(f) 
+-- in terms of the factorization (g, h)
 def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  let ⟨ X, g, h, factorizes ⟩ := φ 
  let L : C := sorry
