@@ -1,7 +1,11 @@
 import Mathlib.CategoryTheory.Functor.Category
 import Mathlib.CategoryTheory.Category.Cat.Limit
 import Mathlib.Logic.Function.Defs
+import Mathlib.Tactic.Find
 
+-- #check Function.Bijective
+-- #find (α : Sort _) → (β : Sort _) → (α → β) → Prop
+-- #find (_ → _) → Prop
 /-
 
 The proof idea here is not original to me; it's due to some
