@@ -101,20 +101,42 @@ instance (E : Type u) : SmallCategory (DiagramShape E) where
   comp_id := sorry
   assoc := sorry
 
+def dfobj {E : Type u} (X B : C) : DiagramShape E → C 
+| none => B
+| some _ => X
+
 -- Definition of the function M : E → fact(f) 
 -- in terms of the factorization (g, h)
+noncomputable 
 def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  let ⟨ X, g, h, factorizes ⟩ := φ 
 
+ let dfobj : DiagramShape E → C 
+ | none => B
+ | some _ => X
+
+ let dfmap {X0 X1 : DiagramShape E}: (X0 ⟶ X1) → (dfobj X0 ⟶ dfobj X1)
+ | dhid c => sorry
+ | dhdown e => sorry
+
  -- The actual diagram we want to take the limit of
- let F : (DiagramShape E) ⥤ C := sorry
+ let F : (DiagramShape E) ⥤ C := {
+   obj := sorry,
+   map := sorry,
+   map_comp := sorry,
+   map_id := sorry
+ }
 
  let limcone : Limits.LimitCone F := Classical.choice (Limits.HasLimit.exists_limit)
  let cone := limcone.cone
 
  let L : C := limcone.cone.pt
- let p : L ⟶ B := sorry 
+
+ -- set p := p' when we know F.obj none is B
+ let p' : L ⟶ F.obj none := limcone.cone.π.app none 
+ let p : L ⟶ B := sorry
  let d : X ⟶ L := sorry
+
  {
   X := L,
   g := g ≫ d,
