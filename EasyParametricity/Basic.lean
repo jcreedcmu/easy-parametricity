@@ -125,7 +125,7 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
    map_id := by rw [← Pi.ext_iff]
  }
 
- let limcone : Limits.LimitCone F := Classical.choice (Limits.HasLimit.exists_limit)
+ let limcone : Limits.LimitCone F := Limits.getLimitCone F
  let cone := limcone.cone
 
  let L : C := limcone.cone.pt
