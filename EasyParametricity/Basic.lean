@@ -121,9 +121,8 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  let F : (DiagramShape E) ⥤ C := {
    obj := dfobj,
    map := dfmap,
-   map_comp := by 
-      intro _ _ _ f g; cases f; rw [Category.id_comp]; rfl; cases g; rw [Category.comp_id]; rfl,
-   map_id := sorry
+   map_comp := by intro _ _ _ f g; cases f; rw [Category.id_comp]; rfl; cases g; rw [Category.comp_id]; rfl,
+   map_id := by rw [← Pi.ext_iff]
  }
 
  let limcone : Limits.LimitCone F := Classical.choice (Limits.HasLimit.exists_limit)
@@ -131,9 +130,7 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
 
  let L : C := limcone.cone.pt
 
- -- set p := p' when we know F.obj none is B
- let p' : L ⟶ F.obj none := limcone.cone.π.app none 
- let p : L ⟶ B := sorry
+ let p : L ⟶ B := limcone.cone.π.app none 
  let d : X ⟶ L := sorry
 
  {
