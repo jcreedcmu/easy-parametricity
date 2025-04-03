@@ -4,9 +4,6 @@ import Mathlib.CategoryTheory.Limits.HasLimits
 import Mathlib.Logic.Function.Defs
 import Mathlib.Tactic.Find
 
--- #check Function.Bijective
--- #find (α : Sort _) → (β : Sort _) → (α → β) → Prop
--- #find (_ → _) → Prop
 /-
 
 The proof idea here is not original to me; it's due to some
@@ -117,7 +114,9 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  | dhid c => 𝟙 (dfobj c)
  | dhdown e => h
 
- -- The actual diagram we want to take the limit of
+ -- The actual diagram we want to take the limit of. It consists
+ -- of one instance of the object B, and E many copies of the morphism
+ -- h : X ⟶ B
  let F : (DiagramShape E) ⥤ C := {
    obj := dfobj,
    map := dfmap,
@@ -129,15 +128,24 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  let cone := limcone.cone
 
  let L : C := limcone.cone.pt
-
  let p : L ⟶ B := limcone.cone.π.app none 
- let d : X ⟶ L := sorry
+
+ let diagonalConeApp   : (tgt : DiagramShape E) → X ⟶ F.obj tgt 
+ | none => h
+ | some e => (𝟙 X)
+
+ let diagonalCone : Limits.Cone F := {pt := X, π := {
+    app := diagonalConeApp, 
+    naturality := by intro A B f; cases f; aesop_cat; aesop_cat
+ }}
+ let d : X ⟶ L := limcone.isLimit.lift diagonalCone
+ let dpLemma : d ≫ p = h := limcone.isLimit.fac diagonalCone none
 
  {
   X := L,
   g := g ≫ d,
   h := p ,
-  factorizes := sorry
+  factorizes := by rw [Category.assoc, dpLemma]; exact factorizes
  }
 
 def idFac : Factor f :=
@@ -157,7 +165,6 @@ def Unull (R : Type u) : Prop := Function.Bijective (λ (r : R) (_ : Type u) => 
 structure isConst {A B : Type u} (h : A → B) where
   uval : B
   path : (a : A) → h a = uval
-
 
 /-
 Lemma 2:
