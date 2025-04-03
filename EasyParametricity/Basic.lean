@@ -96,13 +96,8 @@ instance (E : Type u) : SmallCategory (DiagramShape E) where
   Hom := dhmap 
   id := dhid 
   comp := dhcomp
-  -- These should be easy to prove, but aren't particularly
-  -- interesting
-  comp_id := by intro; intro; intro f; cases f; all_goals rfl
-
-  assoc := by intro W X Y Z f g h; cases f; all_goals (cases g; all_goals rfl)
-
-    
+  comp_id := by intro _ _ f; cases f; all_goals rfl
+  assoc := by intro _ _ _ _ f g h; cases f; all_goals (cases g; all_goals rfl)
 
 def dfobj {E : Type u} (X B : C) : DiagramShape E → C 
 | none => B
@@ -119,14 +114,15 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  | some _ => X
 
  let dfmap {X0 X1 : DiagramShape E}: (X0 ⟶ X1) → (dfobj X0 ⟶ dfobj X1)
- | dhid c => sorry
- | dhdown e => sorry
+ | dhid c => 𝟙 (dfobj c)
+ | dhdown e => h
 
  -- The actual diagram we want to take the limit of
  let F : (DiagramShape E) ⥤ C := {
-   obj := sorry,
-   map := sorry,
-   map_comp := sorry,
+   obj := dfobj,
+   map := dfmap,
+   map_comp := by 
+      intro _ _ _ f g; cases f; rw [Category.id_comp]; rfl; cases g; rw [Category.comp_id]; rfl,
    map_id := sorry
  }
 
