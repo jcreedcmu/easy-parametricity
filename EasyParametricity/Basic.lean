@@ -154,8 +154,10 @@ def idFac : Factor f :=
   let h : X ⟶ B := 𝟙 B
   { X := X, g := g, h := h, factorizes := by rw [Category.comp_id] }
 
-theorem factorLemmaZero : (φ : Factor f) → Mfunc f φ Empty = idFac f
- := sorry
+theorem factorLemmaZero (φ : Factor f) : Mfunc f φ Empty = idFac f := by
+ ext
+ sorry
+ sorry
 
 theorem factorLemmaOne : (φ : Factor f) → Mfunc f φ Unit = φ 
  := sorry
