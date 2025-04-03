@@ -18,6 +18,7 @@ universe v u
 
 variable {C : Type u} [Category C] [Limits.HasLimits.{u} C] {A B : C} (f : A ⟶ B)
 
+@[ext]
 structure Factor where
  X : C
  g : A ⟶ X
@@ -148,6 +149,24 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
   factorizes := by rw [Category.assoc, dpLemma]; exact factorizes
  }
 
+
+
+
+-- This is designed to be a relation which holds when Mfunc φ E ≅ φ' 
+-- The "up to isomorphism"ness of it is crucial to make it easier
+-- to state correctness. Instead of proving that 
+-- Mfunc φ 0 = ⋯ 
+-- Mfunc φ 1 = ⋯ 
+-- and needing to do a bunch of uniqueness reasoning immediately, we'll just
+-- prove that
+-- Mrel φ 0 = ⋯ 
+-- Mrel φ 1 = ⋯ 
+
+def Mrel (φ : Factor f) (E : Type) (φ' : Factor f) : Prop :=
+ let ⟨ X, g, h, factorizes ⟩ := φ 
+ let ⟨ X', g', h', factorizes' ⟩ := φ' 
+ sorry
+
 def idFac : Factor f :=
   let X : C := B
   let g : A ⟶ X := f
@@ -156,6 +175,7 @@ def idFac : Factor f :=
 
 theorem factorLemmaZero (φ : Factor f) : Mfunc f φ Empty = idFac f := by
  ext
+ sorry
  sorry
  sorry
 
