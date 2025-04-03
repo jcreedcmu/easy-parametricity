@@ -97,9 +97,24 @@ instance (E : Type u) : SmallCategory (DiagramShape E) where
   comp_id := by intro _ _ f; cases f; all_goals rfl
   assoc := by intro _ _ _ _ f g h; cases f; all_goals (cases g; all_goals rfl)
 
-def dfobj {E : Type u} (X B : C) : DiagramShape E → C 
-| none => B
-| some _ => X
+def limF (E : Type u) (X B : C) (h : X ⟶ B) : (DiagramShape E) ⥤ C := 
+ let dfobj : DiagramShape E → C 
+ | none => B
+ | some _ => X
+
+ let dfmap {X0 X1 : DiagramShape E}: (X0 ⟶ X1) → (dfobj X0 ⟶ dfobj X1)
+ | dhid c => 𝟙 (dfobj c)
+ | dhdown e => h
+
+ -- The actual diagram we want to take the limit of. It consists
+ -- of one instance of the object B, and E many copies of the morphism
+ -- h : X ⟶ B
+ {
+   obj := dfobj,
+   map := dfmap,
+   map_comp := by intro _ _ _ f g; cases f; rw [Category.id_comp]; rfl; cases g; rw [Category.comp_id]; rfl,
+   map_id := by rw [← Pi.ext_iff]
+ }
 
 -- Definition of the function M : E → fact(f) 
 -- in terms of the factorization (g, h)
@@ -164,8 +179,9 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
 
 def Mrel (φ : Factor f) (E : Type) (φ' : Factor f) : Prop :=
  let ⟨ X, g, h, factorizes ⟩ := φ 
- let ⟨ X', g', h', factorizes' ⟩ := φ' 
- sorry
+ let ⟨ L, gd, p, factorizes' ⟩ := φ' 
+ let d := sorry
+ ∃ cone : Limits.LimitCone F ,  (g ≫ d = g)
 
 def idFac : Factor f :=
   let X : C := B
