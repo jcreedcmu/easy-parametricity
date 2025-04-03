@@ -92,13 +92,20 @@ def dhcomp {E : Type u} {X Y Z : DiagramShape E} : dhmap X Y → dhmap Y Z → d
 | (dhid c) , f => f
 | (dhdown e) , (dhid none) => dhdown e
 
-instance (E : Type u) : SmallCategory (DiagramShape E) where
+instance (E : Type u) : Quiver (DiagramShape E) where
   Hom := dhmap 
+
+instance (E : Type u) : SmallCategory (DiagramShape E) where
   id := dhid 
   comp := dhcomp
   -- These should be easy to prove, but aren't particularly
   -- interesting
-  comp_id := sorry
+  comp_id := by
+   intros ; simp; cases f where
+     | dhid c => sorry
+     | dhdown e => sorry
+   sorry
+
   assoc := sorry
 
 def dfobj {E : Type u} (X B : C) : DiagramShape E → C 
