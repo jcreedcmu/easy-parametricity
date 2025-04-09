@@ -4,6 +4,7 @@ import Mathlib.CategoryTheory.Category.Cat.Limit
 import Mathlib.CategoryTheory.Limits.HasLimits
 import Mathlib.Logic.Function.Defs
 import Mathlib.Tactic.Find
+import Mathlib.Tactic.Have
 
 /-
 
@@ -17,7 +18,7 @@ open CategoryTheory
 universe v u
 
 class Univalent (C : Type u) [Category C] where
-  univalence : (X Y : C) → (f : X ⟶ Y) → IsIso f → X = Y
+  univalence : (X Y : C) → (X ≅ Y) → X = Y
 
 variable {C : Type u} [Category C] [Univalent C] [Limits.HasLimits.{u} C] {A B : C} (f : A ⟶ B)
 
@@ -99,7 +100,7 @@ instance (E : Type u) : SmallCategory (DiagramShape E) where
   comp_id := by intro _ _ f; cases f; all_goals rfl
   assoc := by intro _ _ _ _ f g h; cases f; all_goals (cases g; all_goals rfl)
 
-def pbckDia (E : Type u) (φ : Factor f) : (DiagramShape E) ⥤ C := 
+def diaForType (φ : Factor f) (E : Type u) : (DiagramShape E) ⥤ C := 
  let X := φ.X 
  let g := φ.g
  let h := φ.h
@@ -123,6 +124,10 @@ def pbckDia (E : Type u) (φ : Factor f) : (DiagramShape E) ⥤ C :=
    map_id := by rw [← Pi.ext_iff]
  }
 
+noncomputable
+def limConeForType (φ : Factor f) (E : Type u) : Limits.LimitCone (diaForType f φ E) :=
+   Limits.getLimitCone (diaForType f φ E)
+
 -- Definition of the function M : E → fact(f) 
 -- in terms of the factorization (g, h)
 noncomputable 
@@ -133,9 +138,9 @@ def mFunc (φ : Factor f) (E : Type u) : Factor f :=
  let h := φ.h
  let factorizes := φ.factorizes
 
- let F : (DiagramShape E) ⥤ C := pbckDia f E φ
+ let F : (DiagramShape E) ⥤ C := diaForType f φ E
 
- let limcone : Limits.LimitCone F := Limits.getLimitCone F
+ let limcone : Limits.LimitCone F := limConeForType f φ E
  let cone := limcone.cone
 
  let L : C := limcone.cone.pt
@@ -171,16 +176,40 @@ def idFac : Factor f :=
   let h : X ⟶ B := 𝟙 B
   { X := X, g := g, h := h, factorizes := by rw [Category.comp_id] }
 
-/-
 
--/
+def idFacLimCone : Limits.LimitCone (diaForType f (idFac f) PEmpty) := {
+  cone := { pt := B, π := sorry },
+  isLimit := sorry,
+}
 
+#check idFacLimCone
+
+omit [Limits.HasLimits C] in 
+theorem two_limits_iso (J : Type) [Category J]  (F : J ⥤ C) [Limits.HasLimit F]
+         (A B : Limits.LimitCone F) : A.cone.pt = B.cone.pt := 
+  by
+   have xA : Limits.limit F ≅ A.cone.pt := Limits.limit.isoLimitCone A
+   have xB : Limits.limit F ≅ B.cone.pt := Limits.limit.isoLimitCone B
+   apply Univalent.univalence
+   exact Iso.trans (Iso.symm xA) xB
+
+omit [Limits.HasLimits C] in 
+theorem one_limit_iso {J : Type} [Category J]  (F : J ⥤ C) [Limits.HasLimit F]
+         (A : Limits.LimitCone F) : Limits.limit F = A.cone.pt := 
+  by
+   apply Univalent.univalence
+   exact (Limits.limit.isoLimitCone A)
 
 theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
  ext
- sorry
- sorry
- sorry
+ { 
+   have xx : Limits.limit (diaForType f φ PEmpty) = (idFac f).X := by {
+     apply one_limit_iso (diaForType f (idFac f) PEmpty) (idFacLimCone f)
+     sorry
+   }
+   exact xx }
+ { sorry }
+ { sorry }
 
 theorem factor_lemma_one : (φ : Factor f) → mFunc f φ PUnit = φ 
  := sorry
