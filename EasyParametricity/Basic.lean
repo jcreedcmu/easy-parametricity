@@ -25,7 +25,6 @@ structure Factor where
  h : X ⟶ B
  factorizes : g ≫ h = f
 
-
 /-
 Lemma 1: For any factorization (g : A → X, h : X → B) = f, there exists a function
 M : U → fact(f) that has
@@ -97,7 +96,12 @@ instance (E : Type u) : SmallCategory (DiagramShape E) where
   comp_id := by intro _ _ f; cases f; all_goals rfl
   assoc := by intro _ _ _ _ f g h; cases f; all_goals (cases g; all_goals rfl)
 
-def limF (E : Type u) (X B : C) (h : X ⟶ B) : (DiagramShape E) ⥤ C := 
+def pbckDia (E : Type u) (φ : Factor f) : (DiagramShape E) ⥤ C := 
+ let X := φ.X 
+ let g := φ.g
+ let h := φ.h
+ let factorizes := φ.factorizes
+
  let dfobj : DiagramShape E → C 
  | none => B
  | some _ => X
@@ -119,26 +123,14 @@ def limF (E : Type u) (X B : C) (h : X ⟶ B) : (DiagramShape E) ⥤ C :=
 -- Definition of the function M : E → fact(f) 
 -- in terms of the factorization (g, h)
 noncomputable 
-def Mfunc (φ : Factor f) (E : Type) : Factor f :=
- let ⟨ X, g, h, factorizes ⟩ := φ 
+def Mfunc (φ : Factor f) (E : Type u) : Factor f :=
+ let ⟨ X, g, h, factorizes ⟩ := φ
+ let X := φ.X 
+ let g := φ.g
+ let h := φ.h
+ let factorizes := φ.factorizes
 
- let dfobj : DiagramShape E → C 
- | none => B
- | some _ => X
-
- let dfmap {X0 X1 : DiagramShape E}: (X0 ⟶ X1) → (dfobj X0 ⟶ dfobj X1)
- | dhid c => 𝟙 (dfobj c)
- | dhdown e => h
-
- -- The actual diagram we want to take the limit of. It consists
- -- of one instance of the object B, and E many copies of the morphism
- -- h : X ⟶ B
- let F : (DiagramShape E) ⥤ C := {
-   obj := dfobj,
-   map := dfmap,
-   map_comp := by intro _ _ _ f g; cases f; rw [Category.id_comp]; rfl; cases g; rw [Category.comp_id]; rfl,
-   map_id := by rw [← Pi.ext_iff]
- }
+ let F : (DiagramShape E) ⥤ C := pbckDia f E φ
 
  let limcone : Limits.LimitCone F := Limits.getLimitCone F
  let cone := limcone.cone
@@ -146,13 +138,19 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
  let L : C := limcone.cone.pt
  let p : L ⟶ B := limcone.cone.π.app none 
 
- let diagonalConeApp   : (tgt : DiagramShape E) → X ⟶ F.obj tgt 
+ let diagonalConeApp: (tgt : DiagramShape E) → X ⟶ F.obj tgt 
  | none => h
  | some e => (𝟙 X)
 
+ let reflLemma (A0 : DiagramShape E) : F.map (dhid A0) = 𝟙 (F.obj A0) := rfl
+
  let diagonalCone : Limits.Cone F := {pt := X, π := {
     app := diagonalConeApp, 
-    naturality := by intro A B f; cases f; aesop_cat; aesop_cat
+    naturality := by
+        intro A0 B0 z; cases z
+        rw [reflLemma, Functor.const_obj_map,
+            Category.id_comp (diagonalConeApp A0), Category.comp_id ]
+        aesop_cat
  }}
  let d : X ⟶ L := limcone.isLimit.lift diagonalCone
  let dpLemma : d ≫ p = h := limcone.isLimit.fac diagonalCone none
@@ -164,38 +162,19 @@ def Mfunc (φ : Factor f) (E : Type) : Factor f :=
   factorizes := by rw [Category.assoc, dpLemma]; exact factorizes
  }
 
-
-
-
--- This is designed to be a relation which holds when Mfunc φ E ≅ φ' 
--- The "up to isomorphism"ness of it is crucial to make it easier
--- to state correctness. Instead of proving that 
--- Mfunc φ 0 = ⋯ 
--- Mfunc φ 1 = ⋯ 
--- and needing to do a bunch of uniqueness reasoning immediately, we'll just
--- prove that
--- Mrel φ 0 = ⋯ 
--- Mrel φ 1 = ⋯ 
-
-def Mrel (φ : Factor f) (E : Type) (φ' : Factor f) : Prop :=
- let ⟨ X, g, h, factorizes ⟩ := φ 
- let ⟨ L, gd, p, factorizes' ⟩ := φ' 
- let d := sorry
- ∃ cone : Limits.LimitCone F ,  (g ≫ d = g)
-
 def idFac : Factor f :=
   let X : C := B
   let g : A ⟶ X := f
   let h : X ⟶ B := 𝟙 B
   { X := X, g := g, h := h, factorizes := by rw [Category.comp_id] }
 
-theorem factorLemmaZero (φ : Factor f) : Mfunc f φ Empty = idFac f := by
+theorem factorLemmaZero (φ : Factor f) : Mfunc f φ PEmpty = idFac f := by
  ext
  sorry
  sorry
  sorry
 
-theorem factorLemmaOne : (φ : Factor f) → Mfunc f φ Unit = φ 
+theorem factorLemmaOne : (φ : Factor f) → Mfunc f φ PUnit = φ 
  := sorry
 
 def Unull (R : Type u) : Prop := Function.Bijective (λ (r : R) (_ : Type u) =>  r)
