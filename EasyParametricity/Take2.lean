@@ -42,7 +42,6 @@ structure Factor (f : A ⟶ B) where
  h : X ⟶ B
  factorizes : g ≫ h = f
 
-variable (φ : Factor f) (E : Type u)
 
 /- 
 The trivial factorization of f into f ≫ 𝟙 
@@ -65,20 +64,115 @@ U to the set of factorizations of a morphism in a U-complete category.
 class Unull (R : Type u) where
   unull : (q : Type u → R) → IsConst q 
 
+section diagram
+
+ -- In this section we build up the shape of the diagram we want to take limits of.
+
+ variable (φ : Factor f) (E : Type u)
+
+ -- The diagram category J has E objects "upstairs", and one object "downstairs"
+ def J : Type u := Option E
+
+ -- For every upstairs object, there's a unique morphism down to the
+ -- downstairs object, plus identities.
+ inductive Jmor {E : Type u} : (src tgt : J E) → Type u where
+   | jid : (c : J E) → Jmor c c
+   | jdown : (e : E) → Jmor (some e) none
+
+ open Jmor
+
+ -- Composition. Pretty much what it has to be.
+ def jcomp {E : Type u} {X Y Z : J E} : Jmor X Y → Jmor Y Z → Jmor X Z 
+ | (jid c) , f => f
+ | (jdown e) , (jid none) => jdown e
+
+ -- J is a category
+ instance (E : Type u) : SmallCategory (J E) where
+   Hom := Jmor
+   id := jid 
+   comp := jcomp
+   comp_id := by intro _ _ f; cases f; all_goals rfl
+   assoc := by intro _ _ _ _ f g h; cases f; all_goals (cases g; all_goals rfl)
+
+ -- Now we define a J-shaped category in C. It consists of one
+ -- instance of the object B, and E many copies of the morphism h :
+ -- X ⟶ B
+ def D : J E ⥤ C := 
+   let X := φ.X 
+   let g := φ.g
+   let h := φ.h
+   let Dobj : J E → C
+   | none => B
+   | some _ => X
+   let Dmor {X0 X1 : J E}: (X0 ⟶ X1) → (Dobj X0 ⟶ Dobj X1)
+   | jid c => 𝟙 (Dobj c)
+   | jdown e => h
+   {
+     obj := Dobj,
+     map := Dmor,
+     map_comp := by intro _ _ _ f g; cases f; rw [Category.id_comp]; rfl; cases g; rw [Category.comp_id]; rfl,
+     map_id := by rw [← Pi.ext_iff]
+   }
+
+ -- Here we take the limit of that diagram
+ noncomputable
+ def limCone : Limits.LimitCone (D f φ E) := Limits.getLimitCone (D f φ E) -- unused?
+
+end diagram
+
+
 /-
 This is an important construction. Given a factorization φ, and a type E, 
 we output a factorization such that...
 -/
-def mFunc (φ : Factor f) (E : Type u) : Factor f := sorry
+noncomputable
+def mFunc (φ : Factor f) (E : Type u) : Factor f := 
+ let X := φ.X 
+ let g := φ.g
+ let h := φ.h
+ let factorizes := φ.factorizes
+ open Limits in
+ open Jmor in
+ let J := J E
+ let D : J ⥤ C := D f φ E
+ let limCone : LimitCone D := limCone f φ E -- unused?
+ let L : C := limit D
+ let p : L ⟶ B := limit.π D none
+ -- A J-shaped cone in C to construct the "diagonal" element of the wide pullback.
+ -- FIXME: factor this out of mFunc.
+ let diagonalConeApp: (tgt : J) → X ⟶ D.obj tgt 
+ | none => h
+ | some e => (𝟙 X)
+
+ let reflLemma (A0 : J) : D.map (jid A0) = 𝟙 (D.obj A0) := rfl
+
+ let diagonalCone : Limits.Cone D := {pt := X, π := {
+    app := diagonalConeApp, 
+    naturality := by
+        intro A0 B0 z; cases z
+        rw [reflLemma, Functor.const_obj_map,
+            Category.id_comp (diagonalConeApp A0), Category.comp_id ]
+        aesop_cat
+ }}
+ let d : X ⟶ L := limCone.isLimit.lift diagonalCone
+ let dpLemma : d ≫ p = h := limCone.isLimit.fac diagonalCone none
+ {
+   X := L,
+   g := g ≫ d,
+   h := p ,
+   factorizes := by rw [Category.assoc, dpLemma]; exact factorizes
+ }
 
 /-
 ... M(0) = (f, id) and...
 -/
-theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := sorry
+theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := 
+ sorry
 /-
 ... M(1) = φ 
 -/
-theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := sorry
+theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := 
+ sorry
 
 /-
 If f is a morphism in a U-univalent U-complete category, then any function z : fact(f) → R
