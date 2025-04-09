@@ -1,4 +1,5 @@
 import Mathlib.CategoryTheory.Functor.Category
+import Mathlib.CategoryTheory.Iso
 import Mathlib.CategoryTheory.Category.Cat.Limit
 import Mathlib.CategoryTheory.Limits.HasLimits
 import Mathlib.Logic.Function.Defs
@@ -15,8 +16,10 @@ open CategoryTheory
 
 universe v u
 
+class Univalent (C : Type u) [Category C] where
+  univalence : (X Y : C) → (f : X ⟶ Y) → IsIso f → X = Y
 
-variable {C : Type u} [Category C] [Limits.HasLimits.{u} C] {A B : C} (f : A ⟶ B)
+variable {C : Type u} [Category C] [Univalent C] [Limits.HasLimits.{u} C] {A B : C} (f : A ⟶ B)
 
 @[ext]
 structure Factor where
@@ -123,7 +126,7 @@ def pbckDia (E : Type u) (φ : Factor f) : (DiagramShape E) ⥤ C :=
 -- Definition of the function M : E → fact(f) 
 -- in terms of the factorization (g, h)
 noncomputable 
-def Mfunc (φ : Factor f) (E : Type u) : Factor f :=
+def mFunc (φ : Factor f) (E : Type u) : Factor f :=
  let ⟨ X, g, h, factorizes ⟩ := φ
  let X := φ.X 
  let g := φ.g
@@ -168,18 +171,23 @@ def idFac : Factor f :=
   let h : X ⟶ B := 𝟙 B
   { X := X, g := g, h := h, factorizes := by rw [Category.comp_id] }
 
-theorem factorLemmaZero (φ : Factor f) : Mfunc f φ PEmpty = idFac f := by
+/-
+
+-/
+
+
+theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
  ext
  sorry
  sorry
  sorry
 
-theorem factorLemmaOne : (φ : Factor f) → Mfunc f φ PUnit = φ 
+theorem factor_lemma_one : (φ : Factor f) → mFunc f φ PUnit = φ 
  := sorry
 
 def Unull (R : Type u) : Prop := Function.Bijective (λ (r : R) (_ : Type u) =>  r)
 
-structure isConst {A B : Type u} (h : A → B) where
+structure IsConst {A B : Type u} (h : A → B) where
   uval : B
   path : (a : A) → h a = uval
 
@@ -199,7 +207,7 @@ Compose M : U → fact(f) and r : fact(f) → R
 to get r ∘ M : U → R. By assumption, r ∘ M is a constant function.
 But r(M(0)) = r(f,id) and r(M(1)) = r(g,h), so we're done.
 -/
-def mainLemma (R : Type u) (un : Unull R) (fc : Factor f → R) : isConst fc  :=
+def mainLemma (R : Type u) (un : Unull R) (fc : Factor f → R) : IsConst fc  :=
  sorry
 
 
