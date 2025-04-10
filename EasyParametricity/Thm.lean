@@ -76,11 +76,6 @@ section diagram
      map_id := by rw [← Pi.ext_iff]
    }
 
- -- Here we take the limit of that diagram
- noncomputable
- def limCone : Limits.LimitCone (D f φ E) := Limits.getLimitCone (D f φ E) -- unused?
-
-
  -- Here we establish that the expected data really is a limit cone for the 0-ary wide product
  def zeroLimCone : Limits.LimitCone (D f φ PEmpty) := {
    cone := { pt := B, π := {
@@ -177,7 +172,7 @@ we output a factorization such that...
 -/
 noncomputable
 def mFunc (φ : Factor f) (E : Type u) : Factor f := 
- mFuncCone f φ E (limCone f φ E)
+ mFuncCone f φ E (Limits.getLimitCone (D f φ E))
 
 /-
 ... M(0) = (f, id) and...
