@@ -176,46 +176,27 @@ def mFunc (φ : Factor f) (E : Type u) : Factor f :=
  mFuncCone f φ E (Limits.getLimitCone (D f φ E))
 
 /-
-Here we prove M(0) with a specificied limit cone is (f, id)
--/
-theorem factor_lemma_zero' (φ : Factor f) : mFuncCone f φ PEmpty (zeroLimCone f φ) = idFac f := by
- ext
- {sorry}
- {sorry}
- {sorry}
-
-/-
 Here we prove M(0) = (f, id)
 -/
+omit [Univalent C] in
 theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
+ delta mFunc
  have limits_eq : Limits.getLimitCone (D f φ PEmpty) = zeroLimCone f φ  := by apply two_limit_eq 
- have beta_mfunc : (mFunc f φ PEmpty) = (mFuncCone f φ PEmpty (Limits.getLimitCone (D f φ PEmpty))) := rfl
- rw[beta_mfunc, limits_eq]
- apply factor_lemma_zero' 
-
-/-
-Here we prove M(1) with a specificied limit cone is φ = (g, h)
--/
-omit [Univalent C]
-     [UniqueLimits C]
-     [Limits.HasLimits C] in
-theorem factor_lemma_one' (φ : Factor f) : mFuncCone f φ PUnit (oneLimCone f φ) = φ := by
-  let olc := mFuncCone f φ PUnit.{u + 1} (oneLimCone f φ)
-  change Factor.mk φ.X olc.g φ.h olc.factorizes = Factor.mk φ.X φ.g φ.h φ.factorizes
-  conv => lhs; arg 2; change φ.g ≫ rid φ.X; skip
-  aesop_cat
-
+ have commute : φ.g ≫ φ.h = f := φ.factorizes
+ aesop_cat
 
 /-
 Here we prove M(1) = φ 
 -/
 omit [Univalent C] in
 theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := by
- have limits_eq : Limits.getLimitCone (D f φ PUnit) = oneLimCone f φ  := by apply two_limit_eq 
- have beta_mfunc : (mFunc f φ PUnit) = (mFuncCone f φ PUnit (Limits.getLimitCone (D f φ PUnit))) := rfl
- rw[beta_mfunc, limits_eq]
- apply factor_lemma_one' 
-
+ delta mFunc
+ have limits_eq : Limits.getLimitCone (D f φ PUnit) = oneLimCone f φ := by apply two_limit_eq 
+ rw [limits_eq]
+ let olc := mFuncCone f φ PUnit (oneLimCone f φ)
+ change Factor.mk φ.X olc.g φ.h olc.factorizes = Factor.mk φ.X φ.g φ.h φ.factorizes
+ conv => lhs; arg 2; change φ.g ≫ rid φ.X; skip
+ aesop_cat
 
 /-
 If f is a morphism in a U-univalent U-complete category, then any function z : fact(f) → R
