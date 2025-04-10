@@ -20,7 +20,7 @@ open CategoryStruct renaming id → rid
 universe v u
 
 variable 
-   {C : Type u} [Category C] [Univalent C] [Limits.HasLimits.{u} C] 
+   {C : Type u} [Category C] [Univalent C] [UniqueLimits C] [Limits.HasLimits.{u} C] 
    {A B : C} (f : A ⟶ B) 
 
 theorem empty_cases_is_none (x : Option PEmpty) : x = none := 
@@ -168,25 +168,54 @@ def mFuncCone (φ : Factor f) (E : Type u) (limCone : Limits.LimitCone (D f φ E
 
 /-
 This is an important construction. Given a factorization φ, and a type E, 
-we output a factorization such that...
+we output a factorization such that M(0) = (f, id) and M(1) = φ. Everything
+else depends on that.
 -/
 noncomputable
 def mFunc (φ : Factor f) (E : Type u) : Factor f := 
  mFuncCone f φ E (Limits.getLimitCone (D f φ E))
 
 /-
-... M(0) = (f, id) and...
+Here we prove M(0) with a specificied limit cone is (f, id)
+-/
+theorem factor_lemma_zero' (φ : Factor f) : mFuncCone f φ PEmpty (zeroLimCone f φ) = idFac f := by
+ ext
+ {sorry}
+ {sorry}
+ {sorry}
+
+/-
+Here we prove M(0) = (f, id)
 -/
 theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
- ext
- { sorry }
- { sorry }
- { sorry }
+ have limits_eq : Limits.getLimitCone (D f φ PEmpty) = zeroLimCone f φ  := by apply two_limit_eq 
+ have beta_mfunc : (mFunc f φ PEmpty) = (mFuncCone f φ PEmpty (Limits.getLimitCone (D f φ PEmpty))) := rfl
+ rw[beta_mfunc, limits_eq]
+ apply factor_lemma_zero' 
+
 /-
-... M(1) = φ 
+Here we prove M(1) with a specificied limit cone is φ = (g, h)
 -/
-theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := 
- sorry
+omit [Univalent C]
+     [UniqueLimits C]
+     [Limits.HasLimits C] in
+theorem factor_lemma_one' (φ : Factor f) : mFuncCone f φ PUnit (oneLimCone f φ) = φ := by
+  let olc := mFuncCone f φ PUnit.{u + 1} (oneLimCone f φ)
+  change Factor.mk φ.X olc.g φ.h olc.factorizes = Factor.mk φ.X φ.g φ.h φ.factorizes
+  conv => lhs; arg 2; change φ.g ≫ rid φ.X; skip
+  aesop_cat
+
+
+/-
+Here we prove M(1) = φ 
+-/
+omit [Univalent C] in
+theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := by
+ have limits_eq : Limits.getLimitCone (D f φ PUnit) = oneLimCone f φ  := by apply two_limit_eq 
+ have beta_mfunc : (mFunc f φ PUnit) = (mFuncCone f φ PUnit (Limits.getLimitCone (D f φ PUnit))) := rfl
+ rw[beta_mfunc, limits_eq]
+ apply factor_lemma_one' 
+
 
 /-
 If f is a morphism in a U-univalent U-complete category, then any function z : fact(f) → R
