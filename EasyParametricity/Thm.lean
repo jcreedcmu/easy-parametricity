@@ -88,7 +88,7 @@ section diagram
    isLimit := {
      lift := λ s => s.π.app none
      fac := by intros s j; rw [empty_cases_is_none j]; simp
-     uniq := by intros s lift fac; sorry
+     uniq := by intros s m fac; have x := fac none; simp at x; exact x
    }
  }
 
@@ -119,7 +119,7 @@ section diagram
           have : (rid s.pt) ≫ m = n ≫ φ.h := s.π.naturality (Jmor.jdown (PUnit.unit))
           aesop_cat
          }; {simp}
-     uniq := by intros s lift fac; sorry
+     uniq := by intros s n fac; let x := fac (some PUnit.unit); simp at x; exact x
    }
  }
 
