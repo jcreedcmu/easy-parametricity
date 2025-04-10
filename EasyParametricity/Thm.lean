@@ -131,14 +131,10 @@ section diagram
 
 end diagram
 
-
-
 /-
-This is an important construction. Given a factorization φ, and a type E, 
-we output a factorization such that...
+Auxiliary function for mFunc, which additionally takes a specified limit cone.
 -/
-noncomputable
-def mFunc (φ : Factor f) (E : Type u) : Factor f := 
+def mFuncCone (φ : Factor f) (E : Type u) (limCone : Limits.LimitCone (D f φ E)) : Factor f := 
  let X := φ.X 
  let g := φ.g
  let h := φ.h
@@ -147,9 +143,9 @@ def mFunc (φ : Factor f) (E : Type u) : Factor f :=
  open Jmor in
  let J := J E
  let D : J ⥤ C := D f φ E
- let limCone : LimitCone D := limCone f φ E -- unused?
- let L : C := limit D
- let p : L ⟶ B := limit.π D none
+
+ let L : C := limCone.cone.pt
+ let p : L ⟶ B := limCone.cone.π.app none
  -- A J-shaped cone in C to construct the "diagonal" element of the wide pullback.
  -- FIXME: factor this out of mFunc.
  let diagonalConeApp: (tgt : J) → X ⟶ D.obj tgt 
@@ -174,6 +170,14 @@ def mFunc (φ : Factor f) (E : Type u) : Factor f :=
    h := p ,
    factorizes := by rw [Category.assoc, dpLemma]; exact factorizes
  }
+
+/-
+This is an important construction. Given a factorization φ, and a type E, 
+we output a factorization such that...
+-/
+noncomputable
+def mFunc (φ : Factor f) (E : Type u) : Factor f := 
+ mFuncCone f φ E (limCone f φ E)
 
 /-
 ... M(0) = (f, id) and...
