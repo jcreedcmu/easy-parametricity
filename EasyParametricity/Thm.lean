@@ -5,7 +5,7 @@ import Mathlib.CategoryTheory.Limits.HasLimits
 import Mathlib.Logic.Function.Defs
 import Mathlib.Tactic.Find
 import Mathlib.Tactic.Have
-import EasyParametricity.Prelim
+import EasyParametricity.Basic
 
 /-
 
