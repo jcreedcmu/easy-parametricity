@@ -15,12 +15,16 @@ yet-unpublished work by Jem Lord, see README.md for some links.
 -/
 
 open CategoryTheory
+open CategoryStruct renaming id → rid
 
 universe v u
 
 variable 
    {C : Type v} [Category C] [Univalent C] [Limits.HasLimits.{u} C] 
    {A B : C} (f : A ⟶ B) 
+
+theorem empty_cases_is_none (x : Option PEmpty) : x = none := 
+  by cases x; rfl; tauto
 
 section diagram
 
@@ -76,6 +80,7 @@ section diagram
  noncomputable
  def limCone : Limits.LimitCone (D f φ E) := Limits.getLimitCone (D f φ E) -- unused?
 
+
  -- Here we establish that the expected data really is a limit cone for the 0-ary wide product
  def zeroLimCone : Limits.LimitCone (D f φ PEmpty) := {
    cone := { pt := B, π := {
@@ -85,7 +90,11 @@ section diagram
      naturality := by
       intro A0 B0 z; cases z; { aesop_cat }; { aesop_cat }
    } },
-   isLimit := sorry
+   isLimit := {
+     lift := λ s => s.π.app none
+     fac := by intros s j; rw [empty_cases_is_none j]; simp
+     uniq := by intros s lift fac; sorry
+   }
  }
 
 
@@ -106,7 +115,18 @@ section diagram
             aesop_cat
           }; {aesop_cat}}; {aesop_cat})
    } },
-   isLimit := sorry
+   isLimit := {
+     lift := λ s => s.π.app (some PUnit.unit)
+     fac := by 
+         intros s j; simp; cases j; {
+          let Q := s.pt
+          let n : Q ⟶ φ.X := s.π.app (some PUnit.unit)
+          let m : Q ⟶ B := s.π.app none
+          have : (rid s.pt) ≫ m = n ≫ φ.h := s.π.naturality (Jmor.jdown (PUnit.unit))
+          aesop_cat
+         }; {simp}
+     uniq := by intros s lift fac; sorry
+   }
  }
 
 end diagram
