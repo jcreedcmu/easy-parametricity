@@ -17,13 +17,19 @@ universe v u
 class Univalent (C : Type u) [Category C] where
   univalence : (X Y : C) → (X ≅ Y) → X = Y
 
+-- Any two limits of the same diagram are the same. This should be a
+-- consequence of univalence.
+class UniqueLimits (C : Type u) [Category.{u,u} C] where
+  unique_limits : (J : Type u) → [Category.{u,u} J] → (D : J ⥤ C) → 
+         (A B : Limits.LimitCone D) →  A = B
+
 -- Evidence that h : A → B is a constant function
 structure IsConst {A : Type u} {B : Type v} (h : A → B) where
   uval : B
   path : (a : A) → h a = uval
 
 variable 
-   {C : Type v} [Category C] [Univalent C] [Limits.HasLimits.{u} C] 
+   {C : Type u} [inst_cat : Category C] [Univalent C] [Limits.HasLimits.{u} C] 
    {A B : C} (f : A ⟶ B) 
 
 -- The type of factorizations of f
@@ -80,13 +86,10 @@ theorem two_limit_pt_eq {J : Type} [Category J] (D : J ⥤ C)
    exact hB
 
 
-attribute [ext] Limits.Cone
+-- attribute [ext] Limits.Cone
 
-omit [Limits.HasLimits C] in 
-theorem two_limit_eq {J : Type} [Category J] (D : J ⥤ C) 
-         (A B : Limits.LimitCone D) : A.cone = B.cone :=
-  by
-    ext
-    { sorry }
-    { sorry }
- 
+
+omit [Univalent C] [Limits.HasLimits C] in 
+theorem two_limit_eq {J : Type u} [inst_cat_j : Category.{u,u} J] [uu : UniqueLimits C] (D : J ⥤ C) 
+         (A B : Limits.LimitCone D) : A = B :=
+  UniqueLimits.unique_limits J D A B

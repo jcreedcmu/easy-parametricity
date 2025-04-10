@@ -20,7 +20,7 @@ open CategoryStruct renaming id → rid
 universe v u
 
 variable 
-   {C : Type v} [Category C] [Univalent C] [Limits.HasLimits.{u} C] 
+   {C : Type u} [Category C] [Univalent C] [Limits.HasLimits.{u} C] 
    {A B : C} (f : A ⟶ B) 
 
 theorem empty_cases_is_none (x : Option PEmpty) : x = none := 
@@ -209,3 +209,4 @@ def factorToUnullValue (R : Type u) [Unull R] (z : Factor f → R) (φ : Factor 
 def factorToUnullIsConst (R : Type u) [Unull R] (z : Factor f → R) : IsConst z where
       uval := z (idFac f)
       path := factorToUnullValue f R z
+ 
