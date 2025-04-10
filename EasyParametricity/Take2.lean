@@ -5,6 +5,7 @@ import Mathlib.CategoryTheory.Limits.HasLimits
 import Mathlib.Logic.Function.Defs
 import Mathlib.Tactic.Find
 import Mathlib.Tactic.Have
+import EasyParametricity.Prelim
 
 /-
 
@@ -17,52 +18,9 @@ open CategoryTheory
 
 universe v u
 
--- A category is univalent if the type of identifications between two
--- objects is equivalent to the type of bijections between those two
--- objects. I think the property stated below isn't exactly univalence
--- in light of the hset-ness of the category's type of objects, but
--- close enough for this proof.
-class Univalent (C : Type u) [Category C] where
-  univalence : (X Y : C) → (X ≅ Y) → X = Y
-
--- Evidence that h : A → B is a constant function
-structure IsConst {A : Type u} {B : Type v} (h : A → B) where
-  uval : B
-  path : (a : A) → h a = uval
-
 variable 
    {C : Type v} [Category C] [Univalent C] [Limits.HasLimits.{u} C] 
    {A B : C} (f : A ⟶ B) 
-
--- The type of factorizations of f
-@[ext]
-structure Factor (f : A ⟶ B) where
- X : C
- g : A ⟶ X
- h : X ⟶ B
- factorizes : g ≫ h = f
-
-
-/- 
-The trivial factorization of f into f ≫ 𝟙 
--/ 
-def idFac : Factor f :=
-  let X : C := B
-  let g : A ⟶ X := f
-  let h : X ⟶ B := 𝟙 B
-  { X := X, g := g, h := h, factorizes := by rw [Category.comp_id] }
-
-/-
-A type R is U-null if every function U → R is constant. This is a kind of "smallness"
-measure on R. Most small types you think of --- list of nat, say --- are U-small because
-the type of types is so big and parametrically coherent that you can't do anything interesting
-trying to make a list of nats given a type argument.
-
-Arguably the crucial idea of this proof is that there *is* an interesting function from
-U to the set of factorizations of a morphism in a U-complete category.
--/
-class Unull (R : Type u) where
-  unull : (q : Type u → R) → IsConst q 
 
 section diagram
 
@@ -118,7 +76,41 @@ section diagram
  noncomputable
  def limCone : Limits.LimitCone (D f φ E) := Limits.getLimitCone (D f φ E) -- unused?
 
+ -- Here we establish that the expected data really is a limit cone for the 0-ary wide product
+ def zeroLimCone : Limits.LimitCone (D f φ PEmpty) := {
+   cone := { pt := B, π := {
+     app := fun
+       | none => 𝟙 B
+       | some val => by tauto,
+     naturality := by
+      intro A0 B0 z; cases z; { aesop_cat }; { aesop_cat }
+   } },
+   isLimit := sorry
+ }
+
+
+ -- Here we establish that the expected data really is a limit cone for the 1-ary wide product
+ def oneLimCone : Limits.LimitCone (D f φ PUnit) := 
+--  let reflLemma (A0 : J E) : D.map (jid A0) = 𝟙 (D.obj A0) := rfl
+  let D := D f φ PUnit;
+  {
+   cone := { pt := φ.X, π := {
+     app := fun
+       | none => φ.h
+       | some val => 𝟙 φ.X,
+     naturality := (by
+        intro A0 B0 z; cases z; {
+          cases A0; { 
+            have h : D.map (jid none) = 𝟙 (D.obj none) := by aesop_cat;
+            rw [h];
+            aesop_cat
+          }; {aesop_cat}}; {aesop_cat})
+   } },
+   isLimit := sorry
+ }
+
 end diagram
+
 
 
 /-
@@ -166,8 +158,11 @@ def mFunc (φ : Factor f) (E : Type u) : Factor f :=
 /-
 ... M(0) = (f, id) and...
 -/
-theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := 
- sorry
+theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
+ ext
+ { sorry }
+ { sorry }
+ { sorry }
 /-
 ... M(1) = φ 
 -/
