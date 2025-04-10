@@ -46,7 +46,7 @@ def idFac : Factor f :=
 
 /-
 A type R is U-null if every function U → R is constant. This is a kind of "smallness"
-measure on R. Most small types you think of --- list of nat, say --- are U-small because
+measure on R. Most small types you think of --- list of nat, say --- are U-null because
 the type of types is so big and parametrically coherent that you can't do anything interesting
 trying to make a list of nats given a type argument.
 
