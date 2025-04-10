@@ -61,8 +61,32 @@ class Unull (R : Type u) where
 Now some misc lemmas
 -/
 omit [Limits.HasLimits C] in 
-theorem one_limit_iso {J : Type} [Category J]  (D : J ⥤ C) [Limits.HasLimit D]
+theorem one_limit_eq {J : Type} [Category J]  (D : J ⥤ C) [limit_exists : Limits.HasLimit D]
          (A : Limits.LimitCone D) : Limits.limit D = A.cone.pt := 
   by
    apply Univalent.univalence
    exact (Limits.limit.isoLimitCone A)
+
+omit [Limits.HasLimits C] in 
+theorem two_limit_pt_eq {J : Type} [Category J] (D : J ⥤ C) 
+         (A B : Limits.LimitCone D) : A.cone.pt = B.cone.pt :=
+  by
+   let limEx : Limits.HasLimit D := { exists_limit := Nonempty.intro A }
+   have hA := one_limit_eq (limit_exists := limEx) D A
+   have hB := one_limit_eq (limit_exists := limEx) D B
+   symm at hA
+   trans (Limits.limit D)
+   exact hA
+   exact hB
+
+
+attribute [ext] Limits.Cone
+
+omit [Limits.HasLimits C] in 
+theorem two_limit_eq {J : Type} [Category J] (D : J ⥤ C) 
+         (A B : Limits.LimitCone D) : A.cone = B.cone :=
+  by
+    ext
+    { sorry }
+    { sorry }
+ 
