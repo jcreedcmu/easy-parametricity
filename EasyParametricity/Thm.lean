@@ -20,7 +20,7 @@ open CategoryStruct renaming id → rid
 universe v u
 
 variable 
-   {C : Type u} [Category C] [Univalent C] [UniqueLimits C] [Limits.HasLimits.{u} C] 
+   {C : Type u} [Category C] [UniqueLimits C] [Limits.HasLimits.{u} C] 
    {A B : C} (f : A ⟶ B) 
 
 theorem empty_cases_is_none (x : Option PEmpty) : x = none := 
@@ -177,7 +177,6 @@ def mFunc (φ : Factor f) (E : Type u) : Factor f :=
 /-
 Here we prove M(0) = (f, id)
 -/
-omit [Univalent C] in
 theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
  delta mFunc
  have limits_eq : Limits.getLimitCone (D f φ PEmpty) = zeroLimCone f φ  := by apply two_limit_eq 
@@ -187,7 +186,6 @@ theorem factor_lemma_zero (φ : Factor f) : mFunc f φ PEmpty = idFac f := by
 /-
 Here we prove M(1) = φ 
 -/
-omit [Univalent C] in
 theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := by
  delta mFunc
  have limits_eq : Limits.getLimitCone (D f φ PUnit) = oneLimCone f φ := by apply two_limit_eq 
