@@ -95,7 +95,6 @@ section diagram
 
  -- Here we establish that the expected data really is a limit cone for the 1-ary wide product
  def oneLimCone : Limits.LimitCone (D f φ PUnit) := 
---  let reflLemma (A0 : J E) : D.map (jid A0) = 𝟙 (D.obj A0) := rfl
   let D := D f φ PUnit;
   {
    cone := { pt := φ.X, π := {
@@ -194,8 +193,7 @@ theorem factor_lemma_one (φ : Factor f) : mFunc f φ PUnit = φ := by
  have limits_eq : Limits.getLimitCone (D f φ PUnit) = oneLimCone f φ := by apply two_limit_eq 
  rw [limits_eq]
  let olc := mFuncCone f φ PUnit (oneLimCone f φ)
- change Factor.mk φ.X olc.g φ.h olc.factorizes = Factor.mk φ.X φ.g φ.h φ.factorizes
- conv => lhs; arg 2; change φ.g ≫ rid φ.X; skip
+ change Factor.mk φ.X (φ.g ≫ rid φ.X) φ.h olc.factorizes = Factor.mk φ.X φ.g φ.h φ.factorizes
  aesop_cat
 
 /-
